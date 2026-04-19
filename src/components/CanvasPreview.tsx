@@ -16,7 +16,7 @@ export function CanvasPreview() {
         }}
       >
         {Array.from({ length: cols * rows }).map((_, i) => (
-          <div key={i} className="border border-accent/40" />
+          <div key={i} className="border border-accent/40 hover:bg-accent/20 transition-colors" />
         ))}
       </div>
     </div>
