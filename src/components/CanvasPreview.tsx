@@ -1,4 +1,4 @@
-import { useEditorStore } from '@/stores/useEditorStore';
+import { useEditorStore } from '../stores/useEditorStore';
 
 export function CanvasPreview() {
   const { spriteUrl, cols, rows } = useEditorStore();

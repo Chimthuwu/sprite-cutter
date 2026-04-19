@@ -1,5 +1,5 @@
-import { useEditorStore } from '@/stores/useEditorStore';
-import { Button } from '@/components/ui/button';
+import { useEditorStore } from '../stores/useEditorStore';
+import { Button } from '../../components/ui/button';
 import { Upload } from 'lucide-react';
 
 export function FileUploader() {
