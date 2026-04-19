@@ -5,6 +5,9 @@ interface EditorState {
   spriteUrl: string | null;
   frames: string[];
   selectedFrameIndex: number | null;
+  isPlaying: boolean;
+  currentFrameIndex: number;
+  zoom: number;
   method: 'grid' | 'manual';
   cols: number;
   rows: number;
@@ -12,8 +15,11 @@ interface EditorState {
   tileHeight: number;
   setSpriteSheet: (file: File | null) => void;
   setFrames: (frames: string[]) => void;
-  reorderFrames: (from: number, to: number) => void;
   setSelectedFrameIndex: (index: number | null) => void;
+  setIsPlaying: (isPlaying: boolean) => void;
+  setCurrentFrameIndex: (index: number) => void;
+  setZoom: (zoom: number) => void;
+  reorderFrames: (from: number, to: number) => void;
   setMethod: (method: 'grid' | 'manual') => void;
   setDimensions: (dims: { cols?: number; rows?: number; tileWidth?: number; tileHeight?: number }) => void;
 }
@@ -23,6 +29,9 @@ export const useEditorStore = create<EditorState>((set) => ({
   spriteUrl: null,
   frames: [],
   selectedFrameIndex: null,
+  isPlaying: false,
+  currentFrameIndex: 0,
+  zoom: 100,
   method: 'grid',
   cols: 6,
   rows: 4,
@@ -32,16 +41,22 @@ export const useEditorStore = create<EditorState>((set) => ({
     spriteSheet: file, 
     spriteUrl: file ? URL.createObjectURL(file) : null,
     frames: [],
-    selectedFrameIndex: null
+    selectedFrameIndex: null,
+    isPlaying: false,
+    currentFrameIndex: 0,
+    zoom: 100
   }),
   setFrames: (frames) => set({ frames }),
+  setSelectedFrameIndex: (index) => set({ selectedFrameIndex: index, currentFrameIndex: index ?? 0 }),
+  setIsPlaying: (isPlaying) => set({ isPlaying }),
+  setCurrentFrameIndex: (index) => set({ currentFrameIndex: index }),
+  setZoom: (zoom) => set({ zoom: Math.max(25, Math.min(zoom, 400)) }),
   reorderFrames: (from, to) => set((state) => {
     const newFrames = [...state.frames];
     const [moved] = newFrames.splice(from, 1);
     newFrames.splice(to, 0, moved);
     return { frames: newFrames };
   }),
-  setSelectedFrameIndex: (index) => set({ selectedFrameIndex: index }),
   setMethod: (method) => set({ method }),
   setDimensions: (dims) => set((state) => ({ ...state, ...dims })),
 }));

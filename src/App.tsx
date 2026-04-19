@@ -7,6 +7,8 @@ import { FileUploader } from './components/FileUploader';
 import { SliceControls } from './components/SliceControls';
 import { CanvasPreview } from './components/CanvasPreview';
 import { Timeline } from './components/Timeline';
+import { TransportControls } from './components/TransportControls';
+import { ZoomControls } from './components/ZoomControls';
 
 export default function App() {
   return (
@@ -14,7 +16,7 @@ export default function App() {
       <header className="h-14 border-b border-border flex items-center justify-between px-6 bg-slate-950/80 backdrop-blur-sm z-50">
         <h1 className="text-lg font-bold flex items-center gap-2">
             <div className="w-6 h-6 bg-accent rounded flex items-center justify-center text-xs font-bold text-white">K</div> 
-            KUT.IO
+            SPRITE-KUT
         </h1>
         <div className="flex gap-2">
           <button className="px-4 py-1.5 rounded-md text-sm font-semibold text-text-secondary hover:bg-border transition-colors">GitHub</button>
@@ -37,8 +39,15 @@ export default function App() {
              <CanvasPreview />
           </div>
           <div className="h-64 bg-sidebar border-t border-border flex flex-col">
-            <div className="px-6 py-3 border-b border-border flex justify-between items-center text-xs font-semibold text-text-primary">
-                ANIMATION TIMELINE
+            <div className="px-6 py-3 border-b border-border flex items-center text-xs font-semibold text-text-primary gap-4">
+                <div className="shrink-0 flex items-center gap-4">
+                    <TransportControls />
+                    <span className="text-text-secondary">|</span>
+                    <span>ANIMATION TIMELINE</span>
+                </div>
+                <div className="ml-auto">
+                    <ZoomControls />
+                </div>
             </div>
             <div className="flex-1 p-4 flex gap-3 overflow-x-auto scrollbar-thin scrollbar-thumb-slate-700 scrollbar-track-slate-900">
                 <Timeline />
