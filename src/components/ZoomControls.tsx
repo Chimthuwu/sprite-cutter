@@ -6,7 +6,7 @@ export function ZoomControls() {
   const { zoom, setZoom } = useEditorStore();
 
   return (
-    <div className="absolute top-4 right-4 flex bg-slate-900 rounded-md p-1 shadow-lg border border-border gap-1">
+    <div className="flex bg-slate-900 rounded-md p-1 shadow-lg border border-border gap-1">
       <Button variant="ghost" size="sm" className="h-8 w-8 p-0" onClick={() => setZoom(zoom - 10)}>
         <ZoomOut size={16} />
       </Button>

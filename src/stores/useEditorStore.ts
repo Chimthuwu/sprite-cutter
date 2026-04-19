@@ -6,6 +6,7 @@ interface EditorState {
   frames: string[];
   selectedFrameIndex: number | null;
   isPlaying: boolean;
+  isLooping: boolean;
   currentFrameIndex: number;
   zoom: number;
   method: 'grid' | 'manual';
@@ -17,7 +18,8 @@ interface EditorState {
   setFrames: (frames: string[]) => void;
   setSelectedFrameIndex: (index: number | null) => void;
   setIsPlaying: (isPlaying: boolean) => void;
-  setCurrentFrameIndex: (index: number) => void;
+  setIsLooping: (isLooping: boolean) => void;
+  setCurrentFrameIndex: (index: number | ((prev: number) => number)) => void;
   setZoom: (zoom: number) => void;
   reorderFrames: (from: number, to: number) => void;
   setMethod: (method: 'grid' | 'manual') => void;
@@ -30,6 +32,7 @@ export const useEditorStore = create<EditorState>((set) => ({
   frames: [],
   selectedFrameIndex: null,
   isPlaying: false,
+  isLooping: true,
   currentFrameIndex: 0,
   zoom: 100,
   method: 'grid',
@@ -46,10 +49,13 @@ export const useEditorStore = create<EditorState>((set) => ({
     currentFrameIndex: 0,
     zoom: 100
   }),
-  setFrames: (frames) => set({ frames }),
+  setFrames: (frames) => set({ frames, currentFrameIndex: 0, selectedFrameIndex: null, isPlaying: false }),
   setSelectedFrameIndex: (index) => set({ selectedFrameIndex: index, currentFrameIndex: index ?? 0 }),
   setIsPlaying: (isPlaying) => set({ isPlaying }),
-  setCurrentFrameIndex: (index) => set({ currentFrameIndex: index }),
+  setIsLooping: (isLooping) => set({ isLooping }),
+  setCurrentFrameIndex: (index) => set((state) => ({ 
+    currentFrameIndex: typeof index === 'function' ? index(state.currentFrameIndex) : index 
+  })),
   setZoom: (zoom) => set({ zoom: Math.max(25, Math.min(zoom, 400)) }),
   reorderFrames: (from, to) => set((state) => {
     const newFrames = [...state.frames];

@@ -1,10 +1,10 @@
 import { useEditorStore } from '@/stores/useEditorStore';
 import { Button } from "../../components/ui/button";
-import { Play, Pause } from 'lucide-react';
+import { Play, Pause, Repeat } from 'lucide-react';
 import { useEffect } from 'react';
 
 export function TransportControls() {
-  const { isPlaying, setIsPlaying, frames, setCurrentFrameIndex, selectedFrameIndex } = useEditorStore();
+  const { isPlaying, setIsPlaying, isLooping, setIsLooping, frames, setCurrentFrameIndex, selectedFrameIndex } = useEditorStore();
   const handlePlay = () => {
     if (isPlaying) return;
     if (frames.length === 0) return; // Cannot play if no frames
@@ -21,11 +21,20 @@ export function TransportControls() {
     let interval: NodeJS.Timeout;
     if (isPlaying && frames.length > 0) {
       interval = setInterval(() => {
-        setCurrentFrameIndex((prevIndex) => (prevIndex + 1) % frames.length);
+        setCurrentFrameIndex((prevIndex) => {
+          if (prevIndex + 1 >= frames.length) {
+            if (!isLooping) {
+              setIsPlaying(false);
+              return prevIndex;
+            }
+            return 0;
+          }
+          return prevIndex + 1;
+        });
       }, 200); // 5 FPS
     }
     return () => clearInterval(interval);
-  }, [isPlaying, frames, setCurrentFrameIndex]);
+  }, [isPlaying, isLooping, frames, setCurrentFrameIndex, setIsPlaying]);
 
   return (
     <div className="flex items-center gap-1">
@@ -44,6 +53,14 @@ export function TransportControls() {
         className="h-8 w-8 p-0"
       >
         <Pause size={16} />
+      </Button>
+      <Button 
+        variant={isLooping ? "secondary" : "ghost"} 
+        size="sm" 
+        onClick={() => setIsLooping(!isLooping)}
+        className="h-8 w-8 p-0"
+      >
+        <Repeat size={16} />
       </Button>
     </div>
   );

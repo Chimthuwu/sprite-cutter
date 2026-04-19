@@ -1,10 +1,28 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useEditorStore } from '@/stores/useEditorStore';
 
 export function Timeline() {
-  const { frames, selectedFrameIndex, setSelectedFrameIndex, reorderFrames } = useEditorStore();
+  const { frames, selectedFrameIndex, setSelectedFrameIndex, reorderFrames, isPlaying, currentFrameIndex } = useEditorStore();
   const [contextMenu, setContextMenu] = useState<{ x: number; y: number; index: number } | null>(null);
   const [draggedIndex, setDraggedIndex] = useState<number | null>(null);
+
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (document.activeElement?.tagName === 'INPUT') return;
+      if (selectedFrameIndex === null) return;
+
+      if (e.key === 'ArrowRight') {
+        e.preventDefault();
+        setSelectedFrameIndex(Math.min(frames.length - 1, selectedFrameIndex + 1));
+      } else if (e.key === 'ArrowLeft') {
+        e.preventDefault();
+        setSelectedFrameIndex(Math.max(0, selectedFrameIndex - 1));
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [selectedFrameIndex, frames.length, setSelectedFrameIndex]);
 
   const handleContextMenu = (e: React.MouseEvent, index: number) => {
     e.preventDefault();
@@ -30,7 +48,10 @@ export function Timeline() {
   if (frames.length === 0) return <div className="text-text-secondary text-sm p-4">Slice the sprite sheet to see frames here.</div>;
 
   return (
-    <div className="flex gap-3 overflow-x-auto h-full p-2" onClick={() => setContextMenu(null)}>
+      <div 
+        className="flex gap-3 overflow-x-auto h-full min-h-0 min-w-0 p-2 custom-scrollbar" 
+        onClick={() => setContextMenu(null)}
+      >
       {frames.map((frame, index) => (
         <div 
           key={index} 
@@ -43,7 +64,7 @@ export function Timeline() {
           <span className="text-[10px] text-text-secondary text-center font-mono">#{index + 1}</span>
           <div 
             className={`w-24 h-24 rounded flex items-center justify-center border-2 cursor-pointer transition-colors
-              ${selectedFrameIndex === index ? 'border-accent bg-accent/20' : 'border-border bg-slate-800 hover:border-slate-600'}
+              ${(isPlaying ? currentFrameIndex === index : selectedFrameIndex === index) ? 'border-accent bg-accent/20' : 'border-border bg-slate-800 hover:border-slate-600'}
               ${draggedIndex === index ? 'opacity-50' : 'opacity-100'}`}
             onClick={() => setSelectedFrameIndex(index)}
             onContextMenu={(e) => handleContextMenu(e, index)}
@@ -62,6 +83,6 @@ export function Timeline() {
           <button className="w-full text-left px-3 py-1.5 text-sm hover:bg-slate-800 text-destructive rounded" onClick={() => {/* TODO */}}>Delete</button>
         </div>
       )}
-    </div>
+      </div>
   );
 }
