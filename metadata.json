@@ -1,0 +1,6 @@
+{
+  "name": "Sprite Sheet Cutter & GIF Editor",
+  "description": "A browser-based tool to cut sprite sheets and create custom GIF animations.",
+  "requestFramePermissions": [],
+  "majorCapabilities": []
+}

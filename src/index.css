@@ -1,0 +1,28 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+@import "shadcn/tailwind.css";
+
+@custom-variant dark (&:is(.dark *));
+
+@theme {
+    --color-bg: #020617;
+    --color-sidebar: #0f172a;
+    --color-accent: #6366f1;
+    --color-text-primary: #f8fafc;
+    --color-text-secondary: #94a3b8;
+    --color-border: #1e293b;
+    --color-surface: rgba(30, 41, 59, 0.5);
+    
+    --font-sans: 'Inter', system-ui, sans-serif;
+    
+    --radius-sm: 4px;
+    --radius-md: 6px;
+    --radius-lg: 8px;
+    --radius-xl: 12px;
+}
+
+@layer base {
+  body {
+    @apply bg-bg text-text-primary h-screen overflow-hidden;
+  }
+}
