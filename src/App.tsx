@@ -13,6 +13,8 @@ import { ZoomControls } from './components/ZoomControls';
 
 // @ts-ignore
 import GIF from 'gif.js.optimized';
+// @ts-ignore
+import gifWorkerUrl from 'gif.js.optimized/dist/gif.worker.js?url';
 
 export default function App() {
   const { frames } = useEditorStore();
@@ -20,17 +22,21 @@ export default function App() {
   const handleExport = async () => {
     if (frames.length === 0) return;
 
+    const loadImage = (src: string) => new Promise<HTMLImageElement>((resolve, reject) => {
+      const img = new Image();
+      img.onload = () => resolve(img);
+      img.onerror = reject;
+      img.src = src;
+    });
+
+    const firstImg = await loadImage(frames[0]);
+
     const gif = new GIF({
       workers: 2,
       quality: 10,
-      width: 100, // TODO: Use actual tile dimensions
-      height: 100
-    });
-
-    const loadImage = (src: string) => new Promise<HTMLImageElement>((resolve) => {
-      const img = new Image();
-      img.onload = () => resolve(img);
-      img.src = src;
+      width: firstImg.width,
+      height: firstImg.height,
+      workerScript: gifWorkerUrl
     });
 
     for (const frame of frames) {
