@@ -5,7 +5,7 @@ import { Button } from "../../components/ui/button";
 import { Wand2 } from 'lucide-react';
 
 export function SliceControls() {
-  const { cols, rows, tileWidth, tileHeight, setDimensions, spriteSheet, setFrames } = useEditorStore();
+  const { cols, rows, tileWidth, tileHeight, gridOffsetX, gridOffsetY, setDimensions, spriteSheet, setFrames } = useEditorStore();
 
   const handleAutoSize = () => {
     const spriteUrl = useEditorStore.getState().spriteUrl;
@@ -57,7 +57,7 @@ export function SliceControls() {
           ctx.clearRect(0, 0, tileWidth, tileHeight);
           ctx.drawImage(
             img,
-            c * tileWidth, r * tileHeight, tileWidth, tileHeight, // Source
+            c * tileWidth + gridOffsetX, r * tileHeight + gridOffsetY, tileWidth, tileHeight, // Source
             0, 0, tileWidth, tileHeight // Destination
           );
 
@@ -127,6 +127,28 @@ export function SliceControls() {
               onChange={(e) => {
                 const val = parseInt(e.target.value);
                 if (!isNaN(val)) setDimensions({ tileHeight: val });
+              }} 
+            />
+          </div>
+          <div className="space-y-1">
+            <Label className="text-xs">Grid Offset X</Label>
+            <Input 
+              type="number" 
+              value={gridOffsetX} 
+              onChange={(e) => {
+                const val = parseInt(e.target.value);
+                if (!isNaN(val)) setDimensions({ gridOffsetX: val });
+              }} 
+            />
+          </div>
+          <div className="space-y-1">
+            <Label className="text-xs">Grid Offset Y</Label>
+            <Input 
+              type="number" 
+              value={gridOffsetY} 
+              onChange={(e) => {
+                const val = parseInt(e.target.value);
+                if (!isNaN(val)) setDimensions({ gridOffsetY: val });
               }} 
             />
           </div>

@@ -2,7 +2,7 @@ import { useEditorStore } from '../stores/useEditorStore';
 import { useState, useRef, MouseEvent as ReactMouseEvent } from 'react';
 
 export function CanvasPreview() {
-  const { spriteUrl, cols, rows, frames, selectedFrameIndex, isPlaying, currentFrameIndex, zoom, addFrame } = useEditorStore();
+  const { spriteUrl, cols, rows, frames, selectedFrameIndex, isPlaying, currentFrameIndex, zoom, addFrame, frameOffsets } = useEditorStore();
   const imgRef = useRef<HTMLImageElement>(null);
   
   const [isSelecting, setIsSelecting] = useState(false);
@@ -20,6 +20,8 @@ export function CanvasPreview() {
       displaySrc = frames[idx];
     }
   }
+
+  const offset = !isViewingSheet && frames.length > 0 ? (frameOffsets[isPlaying ? currentFrameIndex : (selectedFrameIndex ?? 0)] || { x: 0, y: 0 }) : { x: 0, y: 0 };
 
   const handleMouseDown = (e: ReactMouseEvent<HTMLDivElement>) => {
     if (!isViewingSheet || !imgRef.current) return;
@@ -112,7 +114,10 @@ export function CanvasPreview() {
               src={displaySrc} 
               alt="Sprite Content" 
               className="max-w-full max-h-full w-auto h-auto block"
-              style={{ imageRendering: 'pixelated' }}
+              style={{ 
+                imageRendering: 'pixelated',
+                transform: !isViewingSheet ? `translate(${offset.x}px, ${offset.y}px)` : 'none'
+              }}
               draggable={false}
               crossOrigin="anonymous"
             />

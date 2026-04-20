@@ -14,6 +14,9 @@ interface EditorState {
   rows: number;
   tileWidth: number;
   tileHeight: number;
+  gridOffsetX: number;
+  gridOffsetY: number;
+  frameOffsets: Record<number, { x: number; y: number }>;
   setSpriteSheet: (file: File | null) => void;
   setFrames: (frames: string[]) => void;
   addFrame: (frame: string) => void;
@@ -24,7 +27,8 @@ interface EditorState {
   setZoom: (zoom: number) => void;
   reorderFrames: (from: number, to: number) => void;
   setMethod: (method: 'grid' | 'manual') => void;
-  setDimensions: (dims: { cols?: number; rows?: number; tileWidth?: number; tileHeight?: number }) => void;
+  setDimensions: (dims: { cols?: number; rows?: number; tileWidth?: number; tileHeight?: number; gridOffsetX?: number; gridOffsetY?: number }) => void;
+  setFrameOffset: (index: number, offset: { x: number; y: number }) => void;
 }
 
 export const useEditorStore = create<EditorState>((set) => ({
@@ -41,6 +45,9 @@ export const useEditorStore = create<EditorState>((set) => ({
   rows: 3,
   tileWidth: 128,
   tileHeight: 128,
+  gridOffsetX: 0,
+  gridOffsetY: 0,
+  frameOffsets: {},
   setSpriteSheet: (file) => {
     const url = file ? URL.createObjectURL(file) : null;
     if (url) {
@@ -65,7 +72,10 @@ export const useEditorStore = create<EditorState>((set) => ({
           cols: calculatedCols,
           rows: calculatedRows,
           tileWidth: bestTileSize,
-          tileHeight: bestTileSize
+          tileHeight: bestTileSize,
+          gridOffsetX: 0,
+          gridOffsetY: 0,
+          frameOffsets: {}
         });
       };
       img.src = url;
@@ -78,10 +88,13 @@ export const useEditorStore = create<EditorState>((set) => ({
       selectedFrameIndex: null,
       isPlaying: false,
       currentFrameIndex: 0,
-      zoom: 100
+      zoom: 100,
+      gridOffsetX: 0,
+      gridOffsetY: 0,
+      frameOffsets: {}
     });
   },
-  setFrames: (frames) => set({ frames, currentFrameIndex: 0, selectedFrameIndex: null, isPlaying: false }),
+  setFrames: (frames) => set({ frames, currentFrameIndex: 0, selectedFrameIndex: null, isPlaying: false, frameOffsets: {} }),
   addFrame: (frame) => set((state) => ({ frames: [...state.frames, frame], selectedFrameIndex: state.frames.length, currentFrameIndex: state.frames.length, isPlaying: false })),
   setSelectedFrameIndex: (index) => set({ selectedFrameIndex: index, currentFrameIndex: index ?? 0 }),
   setIsPlaying: (isPlaying) => set({ isPlaying }),
@@ -94,8 +107,22 @@ export const useEditorStore = create<EditorState>((set) => ({
     const newFrames = [...state.frames];
     const [moved] = newFrames.splice(from, 1);
     newFrames.splice(to, 0, moved);
-    return { frames: newFrames };
+    
+    // Also reorder frame offsets
+    const newOffsets: Record<number, { x: number; y: number }> = {};
+    const oldOffsets = state.frameOffsets;
+    
+    // Simple naive reorder approach - re-mapping indices based on new frame order
+    // In a real app we'd map by frameID instead of frameIndex for persistence
+    const frameMap = new Map();
+    state.frames.forEach((f, i) => frameMap.set(f, oldOffsets[i] || { x: 0, y: 0 }));
+    newFrames.forEach((f, i) => newOffsets[i] = frameMap.get(f));
+    
+    return { frames: newFrames, frameOffsets: newOffsets };
   }),
   setMethod: (method) => set({ method }),
   setDimensions: (dims) => set((state) => ({ ...state, ...dims })),
+  setFrameOffset: (index, offset) => set((state) => ({ 
+    frameOffsets: { ...state.frameOffsets, [index]: offset }
+  })),
 }));
