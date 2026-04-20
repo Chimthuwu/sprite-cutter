@@ -16,6 +16,7 @@ interface EditorState {
   tileHeight: number;
   setSpriteSheet: (file: File | null) => void;
   setFrames: (frames: string[]) => void;
+  addFrame: (frame: string) => void;
   setSelectedFrameIndex: (index: number | null) => void;
   setIsPlaying: (isPlaying: boolean) => void;
   setIsLooping: (isLooping: boolean) => void;
@@ -28,7 +29,7 @@ interface EditorState {
 
 export const useEditorStore = create<EditorState>((set) => ({
   spriteSheet: null,
-  spriteUrl: null,
+  spriteUrl: 'https://i.ibb.co/KzS51L5v/image.png',
   frames: [],
   selectedFrameIndex: null,
   isPlaying: false,
@@ -37,7 +38,7 @@ export const useEditorStore = create<EditorState>((set) => ({
   zoom: 100,
   method: 'grid',
   cols: 6,
-  rows: 4,
+  rows: 2,
   tileWidth: 80,
   tileHeight: 80,
   setSpriteSheet: (file) => set({ 
@@ -50,6 +51,7 @@ export const useEditorStore = create<EditorState>((set) => ({
     zoom: 100
   }),
   setFrames: (frames) => set({ frames, currentFrameIndex: 0, selectedFrameIndex: null, isPlaying: false }),
+  addFrame: (frame) => set((state) => ({ frames: [...state.frames, frame], selectedFrameIndex: state.frames.length, currentFrameIndex: state.frames.length, isPlaying: false })),
   setSelectedFrameIndex: (index) => set({ selectedFrameIndex: index, currentFrameIndex: index ?? 0 }),
   setIsPlaying: (isPlaying) => set({ isPlaying }),
   setIsLooping: (isLooping) => set({ isLooping }),

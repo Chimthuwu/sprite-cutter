@@ -2,18 +2,49 @@ import { useEditorStore } from '@/stores/useEditorStore';
 import { Input } from "../../components/ui/input";
 import { Label } from "../../components/ui/label";
 import { Button } from "../../components/ui/button";
+import { Wand2 } from 'lucide-react';
 
 export function SliceControls() {
   const { cols, rows, tileWidth, tileHeight, setDimensions, spriteSheet, setFrames } = useEditorStore();
 
+  const handleAutoSize = () => {
+    const spriteUrl = useEditorStore.getState().spriteUrl;
+    if (!spriteUrl) return;
+
+    const img = new Image();
+    img.crossOrigin = 'anonymous';
+    img.src = spriteUrl;
+    img.onload = () => {
+      const newWidth = Math.max(1, Math.round(img.width / cols));
+      const newHeight = Math.max(1, Math.round(img.height / rows));
+      setDimensions({ tileWidth: newWidth, tileHeight: newHeight });
+    };
+  };
+
+  const handleAutoGrid = () => {
+    const spriteUrl = useEditorStore.getState().spriteUrl;
+    if (!spriteUrl) return;
+
+    const img = new Image();
+    img.crossOrigin = 'anonymous';
+    img.src = spriteUrl;
+    img.onload = () => {
+      const newCols = Math.max(1, Math.round(img.width / tileWidth));
+      const newRows = Math.max(1, Math.round(img.height / tileHeight));
+      setDimensions({ cols: newCols, rows: newRows });
+    };
+  };
+
   const handleSlice = () => {
-    if (!spriteSheet) {
+    const spriteUrl = useEditorStore.getState().spriteUrl;
+    if (!spriteUrl) {
       alert("Please upload a sprite sheet image first.");
       return;
     }
 
     const img = new Image();
-    img.src = useEditorStore.getState().spriteUrl!;
+    img.crossOrigin = 'anonymous';
+    img.src = spriteUrl;
     img.onload = () => {
       const frames: string[] = [];
       const canvas = document.createElement('canvas');
@@ -100,6 +131,18 @@ export function SliceControls() {
             />
           </div>
         </div>
+        
+        <div className="flex gap-2">
+          <Button variant="outline" className="flex-1 text-xs" onClick={handleAutoGrid} title="Calculate Cols/Rows from current Tile Size">
+            <Wand2 className="w-3 h-3 mr-2" />
+            Auto Grid
+          </Button>
+          <Button variant="outline" className="flex-1 text-xs" onClick={handleAutoSize} title="Calculate Tile Size from current Cols/Rows">
+            <Wand2 className="w-3 h-3 mr-2" />
+            Auto Size
+          </Button>
+        </div>
+
         <Button className="w-full bg-accent text-white font-semibold" onClick={handleSlice}>Slice Sprite Sheet</Button>
       </div>
     </div>
