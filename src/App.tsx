@@ -59,8 +59,7 @@ export default function App() {
     <div className="min-h-screen bg-bg text-text-primary flex flex-col font-sans">
       <header className="h-14 border-b border-border flex items-center justify-between px-6 bg-slate-950/80 backdrop-blur-sm z-50">
         <h1 className="text-lg font-bold flex items-center gap-2">
-            <div className="w-6 h-6 bg-accent rounded flex items-center justify-center text-xs font-bold text-white">K</div> 
-            SPRITE-KUT
+            <img src="https://i.ibb.co/Z6MgzMmq/image.png" alt="SpriteCut" className="h-8" referrerPolicy="no-referrer" />
         </h1>
         <div className="flex gap-2">
           <button className="px-4 py-1.5 rounded-md text-sm font-semibold text-text-secondary hover:bg-border transition-colors">GitHub</button>

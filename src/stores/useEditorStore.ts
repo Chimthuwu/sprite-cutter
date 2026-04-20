@@ -37,19 +37,50 @@ export const useEditorStore = create<EditorState>((set) => ({
   currentFrameIndex: 0,
   zoom: 100,
   method: 'grid',
-  cols: 6,
-  rows: 2,
-  tileWidth: 80,
-  tileHeight: 80,
-  setSpriteSheet: (file) => set({ 
-    spriteSheet: file, 
-    spriteUrl: file ? URL.createObjectURL(file) : null,
-    frames: [],
-    selectedFrameIndex: null,
-    isPlaying: false,
-    currentFrameIndex: 0,
-    zoom: 100
-  }),
+  cols: 8,
+  rows: 3,
+  tileWidth: 128,
+  tileHeight: 128,
+  setSpriteSheet: (file) => {
+    const url = file ? URL.createObjectURL(file) : null;
+    if (url) {
+      const img = new Image();
+      img.onload = () => {
+        const commonSizes = [16, 24, 32, 48, 64, 128, 256];
+        let bestTileSize = 64; // Fallback
+        
+        // Find best matching common size (prioritize exact divisions of width or height)
+        for (const size of [...commonSizes].reverse()) {
+          // If the size evenly divides width and height, or comes very close (like 1-2px padding)
+          if (img.width % size === 0 || img.height % size === 0) {
+            bestTileSize = size;
+            break;
+          }
+        }
+        
+        const calculatedCols = Math.max(1, Math.round(img.width / bestTileSize));
+        const calculatedRows = Math.max(1, Math.round(img.height / bestTileSize));
+        
+        set({
+          cols: calculatedCols,
+          rows: calculatedRows,
+          tileWidth: bestTileSize,
+          tileHeight: bestTileSize
+        });
+      };
+      img.src = url;
+    }
+
+    set({ 
+      spriteSheet: file, 
+      spriteUrl: url,
+      frames: [],
+      selectedFrameIndex: null,
+      isPlaying: false,
+      currentFrameIndex: 0,
+      zoom: 100
+    });
+  },
   setFrames: (frames) => set({ frames, currentFrameIndex: 0, selectedFrameIndex: null, isPlaying: false }),
   addFrame: (frame) => set((state) => ({ frames: [...state.frames, frame], selectedFrameIndex: state.frames.length, currentFrameIndex: state.frames.length, isPlaying: false })),
   setSelectedFrameIndex: (index) => set({ selectedFrameIndex: index, currentFrameIndex: index ?? 0 }),
