@@ -1,13 +1,19 @@
 import { useEditorStore } from '../stores/useEditorStore';
-import { useState, useRef, MouseEvent as ReactMouseEvent } from 'react';
+import { useState, useRef, useEffect, MouseEvent as ReactMouseEvent } from 'react';
 
 export function CanvasPreview() {
-  const { spriteUrl, cols, rows, frames, selectedFrameIndex, isPlaying, currentFrameIndex, zoom, addFrame, frameOffsets } = useEditorStore();
+  const { spriteUrl, cols, rows, tileWidth, tileHeight, gridOffsetX, gridOffsetY, frames, selectedFrameIndex, isPlaying, currentFrameIndex, zoom, addFrame, frameOffsets } = useEditorStore();
   const imgRef = useRef<HTMLImageElement>(null);
   
   const [isSelecting, setIsSelecting] = useState(false);
   const [startPos, setStartPos] = useState({ x: 0, y: 0 });
   const [currPos, setCurrPos] = useState({ x: 0, y: 0 });
+  const [imgDimensions, setImgDimensions] = useState<{ width: number; height: number; naturalWidth: number; naturalHeight: number } | null>(null);
+
+  useEffect(() => {
+    // Reset dimensions when the spriteUrl changes
+    setImgDimensions(null);
+  }, [spriteUrl]);
 
   if (!spriteUrl) return <div className="text-text-secondary text-sm">Upload a sprite sheet to begin</div>;
   
@@ -91,10 +97,56 @@ export function CanvasPreview() {
     addFrame(frameData);
   };
 
+  const handleImageLoad = () => {
+    if (imgRef.current) {
+      setImgDimensions({
+        width: imgRef.current.width,
+        height: imgRef.current.height,
+        naturalWidth: imgRef.current.naturalWidth,
+        naturalHeight: imgRef.current.naturalHeight,
+      });
+    }
+  };
+
   const selX = Math.min(startPos.x, currPos.x);
   const selY = Math.min(startPos.y, currPos.y);
   const selW = Math.abs(currPos.x - startPos.x);
   const selH = Math.abs(currPos.y - startPos.y);
+
+  // Generate exact grid overlay elements based on tile size and scale
+  const renderGridCells = () => {
+    if (!isViewingSheet || !imgDimensions) return null;
+
+    const scaleX = imgDimensions.width / imgDimensions.naturalWidth;
+    const scaleY = imgDimensions.height / imgDimensions.naturalHeight;
+
+    const cells: React.ReactNode[] = [];
+    for (let r = 0; r < rows; r++) {
+      for (let c = 0; c < cols; c++) {
+        const left = (c * tileWidth + gridOffsetX) * scaleX;
+        const top = (r * tileHeight + gridOffsetY) * scaleY;
+        const width = tileWidth * scaleX;
+        const height = tileHeight * scaleY;
+
+        // Only render grid cell if it sits within the bounds of the scaled image
+        if (left < imgDimensions.width && top < imgDimensions.height) {
+          cells.push(
+            <div
+              key={`${r}-${c}`}
+              className="absolute border border-accent/40 bg-accent/5 pointer-events-none transition-all duration-200"
+              style={{
+                left: `${left}px`,
+                top: `${top}px`,
+                width: `${Math.min(width, imgDimensions.width - left)}px`,
+                height: `${Math.min(height, imgDimensions.height - top)}px`,
+              }}
+            />
+          );
+        }
+      }
+    }
+    return <div className="absolute inset-0 pointer-events-none">{cells}</div>;
+  };
 
   return (
     <div className="relative flex shadow-2xl rounded-lg border border-border w-full h-full max-h-full bg-slate-950 overflow-auto custom-scrollbar">
@@ -120,22 +172,11 @@ export function CanvasPreview() {
               }}
               draggable={false}
               crossOrigin="anonymous"
+              onLoad={handleImageLoad}
             />
             
-            {/* The Grid Overlay (only shown if viewing sheet and no selection active) */}
-            {isViewingSheet && !isSelecting && (
-              <div 
-                className="absolute inset-0 grid pointer-events-none opacity-50" 
-                style={{ 
-                  gridTemplateColumns: `repeat(${cols}, 1fr)`,
-                  gridTemplateRows: `repeat(${rows}, 1fr)`
-                }}
-              >
-                {Array.from({ length: cols * rows }).map((_, i) => (
-                  <div key={i} className="border border-accent/40" />
-                ))}
-              </div>
-            )}
+            {/* The Grid Overlay */}
+            {renderGridCells()}
 
             {/* Interaction Layer for Drag Selection */}
             {isViewingSheet && (

@@ -17,6 +17,9 @@ interface EditorState {
   gridOffsetX: number;
   gridOffsetY: number;
   frameOffsets: Record<number, { x: number; y: number }>;
+  apiKey: string;
+  userProfile: { name: string; email: string; avatar: string } | null;
+  isGenerating: boolean;
   setSpriteSheet: (file: File | null) => void;
   setFrames: (frames: string[]) => void;
   addFrame: (frame: string) => void;
@@ -29,6 +32,10 @@ interface EditorState {
   setMethod: (method: 'grid' | 'manual') => void;
   setDimensions: (dims: { cols?: number; rows?: number; tileWidth?: number; tileHeight?: number; gridOffsetX?: number; gridOffsetY?: number }) => void;
   setFrameOffset: (index: number, offset: { x: number; y: number }) => void;
+  setApiKey: (apiKey: string) => void;
+  setUserProfile: (profile: { name: string; email: string; avatar: string } | null) => void;
+  setIsGenerating: (isGenerating: boolean) => void;
+  setSpriteUrl: (url: string | null) => void;
 }
 
 export const useEditorStore = create<EditorState>((set) => ({
@@ -48,6 +55,9 @@ export const useEditorStore = create<EditorState>((set) => ({
   gridOffsetX: 0,
   gridOffsetY: 0,
   frameOffsets: {},
+  apiKey: localStorage.getItem('spritecut_api_key') || '',
+  userProfile: localStorage.getItem('spritecut_user') ? JSON.parse(localStorage.getItem('spritecut_user')!) : null,
+  isGenerating: false,
   setSpriteSheet: (file) => {
     const url = file ? URL.createObjectURL(file) : null;
     if (url) {
@@ -125,4 +135,18 @@ export const useEditorStore = create<EditorState>((set) => ({
   setFrameOffset: (index, offset) => set((state) => ({ 
     frameOffsets: { ...state.frameOffsets, [index]: offset }
   })),
+  setApiKey: (apiKey) => {
+    localStorage.setItem('spritecut_api_key', apiKey);
+    set({ apiKey });
+  },
+  setUserProfile: (profile) => {
+    if (profile) {
+      localStorage.setItem('spritecut_user', JSON.stringify(profile));
+    } else {
+      localStorage.removeItem('spritecut_user');
+    }
+    set({ userProfile: profile });
+  },
+  setIsGenerating: (isGenerating) => set({ isGenerating }),
+  setSpriteUrl: (url) => set({ spriteUrl: url, frames: [], selectedFrameIndex: null, currentFrameIndex: 0, frameOffsets: {} }),
 }));
