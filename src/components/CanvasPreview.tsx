@@ -1,5 +1,5 @@
+import React, { useState, useRef, useEffect, MouseEvent as ReactMouseEvent } from 'react';
 import { useEditorStore } from '../stores/useEditorStore';
-import { useState, useRef, useEffect, MouseEvent as ReactMouseEvent } from 'react';
 
 export function CanvasPreview() {
   const { spriteUrl, cols, rows, tileWidth, tileHeight, gridOffsetX, gridOffsetY, frames, selectedFrameIndex, isPlaying, currentFrameIndex, zoom, addFrame, frameOffsets } = useEditorStore();
@@ -99,12 +99,15 @@ export function CanvasPreview() {
 
   const handleImageLoad = () => {
     if (imgRef.current) {
+      const naturalW = imgRef.current.naturalWidth;
+      const naturalH = imgRef.current.naturalHeight;
       setImgDimensions({
         width: imgRef.current.width,
         height: imgRef.current.height,
-        naturalWidth: imgRef.current.naturalWidth,
-        naturalHeight: imgRef.current.naturalHeight,
+        naturalWidth: naturalW,
+        naturalHeight: naturalH,
       });
+      useEditorStore.getState().setImageDimensions(naturalW, naturalH);
     }
   };
 

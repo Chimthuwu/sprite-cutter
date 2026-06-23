@@ -17,6 +17,8 @@ interface EditorState {
   gridOffsetX: number;
   gridOffsetY: number;
   frameOffsets: Record<number, { x: number; y: number }>;
+  imageWidth: number;
+  imageHeight: number;
   apiKey: string;
   userProfile: { name: string; email: string; avatar: string } | null;
   isGenerating: boolean;
@@ -36,6 +38,7 @@ interface EditorState {
   setUserProfile: (profile: { name: string; email: string; avatar: string } | null) => void;
   setIsGenerating: (isGenerating: boolean) => void;
   setSpriteUrl: (url: string | null) => void;
+  setImageDimensions: (width: number, height: number) => void;
 }
 
 export const useEditorStore = create<EditorState>((set) => ({
@@ -55,6 +58,8 @@ export const useEditorStore = create<EditorState>((set) => ({
   gridOffsetX: 0,
   gridOffsetY: 0,
   frameOffsets: {},
+  imageWidth: 1024,
+  imageHeight: 384,
   apiKey: localStorage.getItem('spritecut_api_key') || '',
   userProfile: localStorage.getItem('spritecut_user') ? JSON.parse(localStorage.getItem('spritecut_user')!) : null,
   isGenerating: false,
@@ -79,6 +84,8 @@ export const useEditorStore = create<EditorState>((set) => ({
         const calculatedRows = Math.max(1, Math.round(img.height / bestTileSize));
         
         set({
+          imageWidth: img.width,
+          imageHeight: img.height,
           cols: calculatedCols,
           rows: calculatedRows,
           tileWidth: bestTileSize,
@@ -148,5 +155,18 @@ export const useEditorStore = create<EditorState>((set) => ({
     set({ userProfile: profile });
   },
   setIsGenerating: (isGenerating) => set({ isGenerating }),
-  setSpriteUrl: (url) => set({ spriteUrl: url, frames: [], selectedFrameIndex: null, currentFrameIndex: 0, frameOffsets: {} }),
+  setSpriteUrl: (url) => {
+    if (url) {
+      const img = new Image();
+      img.onload = () => {
+        set({
+          imageWidth: img.width,
+          imageHeight: img.height,
+        });
+      };
+      img.src = url;
+    }
+    set({ spriteUrl: url, frames: [], selectedFrameIndex: null, currentFrameIndex: 0, frameOffsets: {} });
+  },
+  setImageDimensions: (width, height) => set({ imageWidth: width, imageHeight: height }),
 }));
