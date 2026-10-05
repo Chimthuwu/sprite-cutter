@@ -1,4 +1,5 @@
 import { create } from 'zustand';
+import { guessGrid } from '../../lib/grid';
 
 interface EditorState {
   spriteSheet: File | null;
@@ -68,28 +69,15 @@ export const useEditorStore = create<EditorState>((set) => ({
     if (url) {
       const img = new Image();
       img.onload = () => {
-        const commonSizes = [16, 24, 32, 48, 64, 128, 256];
-        let bestTileSize = 64; // Fallback
-        
-        // Find best matching common size (prioritize exact divisions of width or height)
-        for (const size of [...commonSizes].reverse()) {
-          // If the size evenly divides width and height, or comes very close (like 1-2px padding)
-          if (img.width % size === 0 || img.height % size === 0) {
-            bestTileSize = size;
-            break;
-          }
-        }
-        
-        const calculatedCols = Math.max(1, Math.round(img.width / bestTileSize));
-        const calculatedRows = Math.max(1, Math.round(img.height / bestTileSize));
-        
+        const guess = guessGrid(img.width, img.height);
+
         set({
           imageWidth: img.width,
           imageHeight: img.height,
-          cols: calculatedCols,
-          rows: calculatedRows,
-          tileWidth: bestTileSize,
-          tileHeight: bestTileSize,
+          cols: guess.cols,
+          rows: guess.rows,
+          tileWidth: guess.tileWidth,
+          tileHeight: guess.tileHeight,
           gridOffsetX: 0,
           gridOffsetY: 0,
           frameOffsets: {}
