@@ -54,8 +54,8 @@ SpriteCut runs entirely in your browser — fast and private.
 ## Run locally
 
 ```bash
-git clone https://github.com/YOUR_USERNAME/YOUR_REPO.git
-cd YOUR_REPO
+git clone https://github.com/Chimthuwu/sprite-cutter.git
+cd sprite-cutter
 npm install
 npm run dev
 ```
